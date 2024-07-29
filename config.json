@@ -1,0 +1,17 @@
+{
+    "average_minutes_per_count": 60,
+    "count_settings": {
+        "include_count": true,
+        "format": "[{count}일차]"
+    },
+    "range_settings": {
+        "include_start_chapter_title": true,
+        "include_end_chapter_title": true,
+        "chapter_format": "{section}.{chapter}",
+        "range_separator_format": "~"
+    },
+    "duration_settings": {
+        "include_duration": true,
+        "duration_format": "({hh}:{mm}:{ss})"
+    }
+}
