@@ -1,115 +1,67 @@
-COURSE = """목차"""
+import argparse
+from config import Config
+from crawler import Crawler
+from scheduler import Scheduler
+from file import Exporter, Loader
 
-MINUTES_PER_DAY = 80
-SCHEDULE_FORMAT = "섹션 {}-{} ({})"
+def main():
+    parser = argparse.ArgumentParser(description='Inflearn Course Scheduler')
+    subparsers = parser.add_subparsers(dest='command')
 
-TIME_PER_DAY = str(MINUTES_PER_DAY) + ":00"
+    DEFAULT_CONFIG_FILENAME = 'config.json'
 
-schedules = []
+    TOC_OUTPUT = 'toc_output'
+    SCHEDULE_OUTPUT = 'schedule_output'
 
+    # toc+schedule 한 번에 명령어
+    parser_auto = subparsers.add_parser('auto', help='강의 목차 추출 & 수강 일정 계산 & 파일 저장')
+    parser_auto.add_argument('url', type=str, help='강의 URL')
+    parser_auto.add_argument('-c', '--config', type=str, default=DEFAULT_CONFIG_FILENAME, help='설정 파일 경로')
+    parser_auto.add_argument('-o', '--out', type=str, help='수강 일정 파일명')
 
-def add_schedule(start_range, end_range, sum_time):
-    schedules.append(SCHEDULE_FORMAT.format(start_range, end_range, sum_time))
+    # 강의 목차 추출 및 저장 명령어
+    parser_toc = subparsers.add_parser('toc', help='강의 목차 추출 및 저장')
+    parser_toc.add_argument('url', type=str, help='강의 URL')
+    parser_toc.add_argument('-c', '--config', type=str, default=DEFAULT_CONFIG_FILENAME, help='설정 파일 경로')
+    parser_toc.add_argument('-o', '--out', type=str, help='강의 목차 파일명')
 
+    # 수강 일정 계산 및 저장 명령어
+    parser_schedule = subparsers.add_parser('schedule', help='수강 일정 계산 및 저장')
+    parser_schedule.add_argument('filename', type=str, help='강의 목차 파일명')
+    parser_schedule.add_argument('-c', '--config', type=str, default=DEFAULT_CONFIG_FILENAME, help='설정 파일 경로')
+    parser_schedule.add_argument('-o', '--out', type=str, help='수강 일정 파일명')
 
-def add_time(base_time, additional_time):
-    base_minutes, base_seconds = map(int, base_time.split(':'))
-    additional_minutes, additional_seconds = map(int, additional_time.split(':'))
-    total_minutes = base_minutes + additional_minutes
-    total_seconds = base_seconds + additional_seconds
-    if total_seconds >= 60:
-        total_minutes += total_seconds // 60
-        total_seconds = total_seconds % 60
-    formatted_time = f"{total_minutes:02d}:{total_seconds:02d}"
-    return formatted_time
+    args = parser.parse_args()
+    config = Config(args.config)
+    exporter = Exporter(config)
 
-
-def is_same_or_longer_than(time1, time2):
-    minutes1, seconds1 = map(int, time1.split(':'))
-    minutes2, seconds2 = map(int, time2.split(':'))
-
-    if minutes1 < minutes2 or (minutes1 == minutes2 and seconds1 < seconds2):
-        return False
-    elif minutes1 > minutes2 or (minutes1 == minutes2 and seconds1 > seconds2):
-        return True
+    if args.command == 'schedule':
+        output_file = args.out if args.out else config.get_config_value(SCHEDULE_OUTPUT)
+        toc_file = args.filename if args.filename else config.get_config_value(TOC_OUTPUT)
+        loader = Loader()
+        toc = loader.read_course_data(toc_file)
+        scheduler = Scheduler(config, toc)
+        schedules = scheduler.calculate_schedules()
+        exporter.save_schedules(schedules, output_file)
+    elif args.command == 'toc':
+        output_file = args.out if args.out else config.get_config_value(TOC_OUTPUT)
+        crawler = Crawler(args.url)
+        toc = crawler.crawl_and_extract_curriculum()
+        exporter.save_lessons(toc, output_file)
+    elif args.command == 'auto':
+        toc_output_file = config.get_config_value('toc_output')
+        schedule_output_file = args.out if args.out else config.get_config_value('schedule_output')
+        # toc
+        crawler = Crawler(args.url)
+        toc = crawler.crawl_and_extract_curriculum()
+        exporter.save_lessons(toc, toc_output_file)
+        # schedule
+        scheduler = Scheduler(config, toc)
+        schedule = scheduler.calculate_schedules()
+        exporter.save_schedules(schedule, schedule_output_file)
     else:
-        return True
+        parser.print_help()
 
 
-def get_diff_seconds(base, time):
-    base_minutes, base_seconds = map(int, base.split(':'))
-    minutes, seconds = map(int, time.split(':'))
-
-    total_base_seconds = base_minutes * 60 + base_seconds
-    total_seconds = minutes * 60 + seconds
-    return total_seconds - total_base_seconds
-
-
-categories_meta = COURSE.split("\n")
-
-categories = list(filter(lambda x: not (len(x) <= 1 or "강 ∙ " in x or "미리보기" == x), categories_meta))
-
-idx = 0
-sub_sec = 0
-sec = 0
-toc = []
-
-while idx < len(categories):
-    if categories[idx].startswith("섹션"):
-        sec += 1
-        idx += 1
-        sub_sec = 0
-    elif ":" in categories[idx] and len(categories[idx]) == 5:
-        toc[-1] = (toc[-1][0], categories[idx])
-        idx += 1
-    else:
-        sub_sec += 1
-        toc.append(("{:02d}.{:02d} {}".format(sec, sub_sec, categories[idx]), None))
-        idx += 1
-
-days = 1
-
-next_idx = 0
-start_range = ""
-end_range = ""
-schedules = []
-
-today_time = "00:00"
-total_time = "00:00"
-calculated_time = "00:00"
-
-while next_idx < len(toc) - 1:
-
-    next_time = add_time(today_time, toc[next_idx][1])
-
-    today_seconds = abs(get_diff_seconds(TIME_PER_DAY, today_time))
-    next_seconds = abs(get_diff_seconds(TIME_PER_DAY, next_time))
-
-    if not start_range:
-        start_range = toc[next_idx][0].split(" ")[0]
-
-    if today_seconds < next_seconds:
-        end_range = toc[next_idx - 1][0].split(" ")[0]
-        add_schedule(start_range, end_range, today_time)
-        calculated_time = add_time(calculated_time, today_time)
-        days += 1
-        today_time = "00:00"
-        end_range = ""
-        start_range = ""
-    else:
-        today_time = next_time
-        next_idx += 1
-
-if not (is_same_or_longer_than(total_time, calculated_time)):
-    end_range = toc[-1][0].split(" ")[0]
-    rest_time = add_time(today_time, toc[-1][1])
-    add_schedule(start_range, end_range, rest_time)
-
-print("\n".join(schedules))
-
-for (sc_title, sc_time) in toc:
-    total_time = add_time(sc_time, total_time)
-
-t_meta = total_time.split(":")
-total_time = "{:02d}:{:02d}:{:02d}".format(int(t_meta[0]) // 60, int(t_meta[0]) % 60, int(t_meta[1]))
-print("총 {}".format(total_time, total_time))
+if __name__ == '__main__':
+    main()
