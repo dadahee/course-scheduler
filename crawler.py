@@ -4,7 +4,6 @@ from typing import List
 
 import chromedriver_autoinstaller
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -12,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-from src.data import Lesson, Section
+from data import Lesson, Section
 
 
 class Crawler:
@@ -65,7 +64,7 @@ class Crawler:
                     except:
                         attempts += 1
                         time.sleep(0.5)
-            except TimeoutException:
+            except Exception:
                 # "모두 접기" 버튼 찾기
                 collapse_button = self.driver.find_element(By.XPATH, '//button[.//span[text()="모두 접기"]]')
                 if collapse_button:
@@ -76,18 +75,19 @@ class Crawler:
 
                 # 커리큘럼 정보 추출
                 sections = self.driver.find_elements(By.XPATH, '//div[contains(@class, "mantine-Accordion-item")]')
-                section_pattern = r"섹션 (\d+)\."
+                section_pattern = r"섹션 (\d+)\. (.+)"
 
                 for section in sections:
                     section_title_element = section.find_element(By.XPATH,
                                                                  './/button[contains(@class, "mantine-Accordion-control")]/span/div/p')
-                    section_title = section_title_element.text.strip()
-                    match = re.search(section_pattern, section_title)
+                    section_title_element_text = section_title_element.text.strip()
+                    match = re.search(section_pattern, section_title_element_text)
 
                     section_info = None
 
                     if match:
                         section_number = match.group(1)
+                        section_title = match.group(2)
                         section_info = Section(section_number, section_title)
 
                     lessons = section.find_elements(By.XPATH, './/ul/li')
@@ -110,14 +110,16 @@ class Crawler:
                         finally:
                             lesson = Lesson(section_info, number + 1, lesson_title, lesson_duration)
                             self.lessons.append(lesson)
-        finally:
             end_time = datetime.datetime.now()
+            print(f"영상이 아닌 자료 {attached_contents}개가 목차에서 제외되었습니다.")
+            print(f"소요 시간: {end_time - start_time}")
             print(f"강의 목차 크롤링이 완료되었습니다!")
-            print(f"강의 영상 외 자료 {attached_contents}개가 목차에서 제외되었습니다.")
-            print(f"총 소요 시간: {end_time - start_time}")
             print("======================================================")
             self.driver.quit()
-
+            return self.lessons
+        except Exception as e:
+            print("강의 정보를 찾을 수 없습니다.")
+            exit()
 
     def get_lessons(self) -> List[Lesson]:
         return self.lessons

@@ -8,7 +8,7 @@ class Section:
         self.title = title
 
     def __str__(self):
-        return f"{self.index:02}. {self.title}"
+        return f"{self.index:0>2}. {self.title}"
 
 
 class Lesson:
@@ -20,7 +20,7 @@ class Lesson:
         self.duration = self.parse_duration(duration)
 
     def __str__(self):
-        return f"{self.section.index:02}.{self.number:02} {self.title} ({self.duration})"
+        return f"{self.section.index:0>2}.{self.number:0>2} {self.title} ({self.duration})"
 
     @staticmethod
     def parse_duration(duration_str: str) -> datetime.timedelta:
