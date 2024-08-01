@@ -5,9 +5,9 @@
         "format": "[{count}일차]"
     },
     "range_settings": {
-        "include_start_chapter_title": true,
-        "include_end_chapter_title": true,
-        "chapter_format": "{section}.{chapter}",
+        "include_start_lesson_title": true,
+        "include_end_lesson_title": true,
+        "lesson_index_format": "{section}.{number}",
         "range_separator_format": "~"
     },
     "duration_settings": {
