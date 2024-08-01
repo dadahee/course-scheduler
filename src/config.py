@@ -7,10 +7,10 @@ class Config:
     DEFAULT_COUNT_ENABLED = True
     DEFAULT_COUNT_FORMAT = "{count}."
     DEFAULT_LESSON_TITLE_ENABLED = True
-    DEFAULT_LESSON_INDEX_FORMAT = '{section}.{number}'
+    DEFAULT_LESSON_INDEX_FORMAT = '{section:02}.{number:02}'
     DEFAULT_RANGE_SEPARATOR = '~'
     DEFAULT_DURATION_ENABLED = True
-    DEFAULT_DURATION_FORMAT = '({hh}:{mm}:{ss})'
+    DEFAULT_DURATION_FORMAT = '({hh:02}:{mm:02}:{ss:02})'
 
     def __init__(self, config_path: str):
         self.config = self.load_config(config_path)

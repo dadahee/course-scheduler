@@ -7,11 +7,11 @@
     "range_settings": {
         "include_start_lesson_title": true,
         "include_end_lesson_title": true,
-        "lesson_index_format": "{section}.{number}",
+        "lesson_index_format": "{section:02}.{number:02}",
         "range_separator_format": "~"
     },
     "duration_settings": {
         "include_duration": true,
-        "duration_format": "({hh}:{mm}:{ss})"
+        "duration_format": "({hh:02}:{mm:2}:{ss:2})"
     }
 }
