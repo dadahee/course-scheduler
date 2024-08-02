@@ -1,4 +1,5 @@
 {
+    "include_course_name_header": true,
     "average_minutes_per_count": 60,
     "count_settings": {
         "include_count": true,
@@ -8,11 +9,12 @@
         "include_start_lesson_title": true,
         "include_end_lesson_title": true,
         "lesson_index_format": "{section:0>2}.{number:0>2}",
+        "section_index_format": "{section:0>2}.",
         "range_separator_format": "~"
     },
     "duration_settings": {
         "include_duration": true,
-        "duration_format": "({hh:0>2}:{mm:0>2}:{ss:0>2})"
+        "format": "({hh:0>2}:{mm:0>2}:{ss:0>2})"
     },
     "toc_output": "outputs/toc.md",
     "schedule_output": "outputs/schedule.md"
