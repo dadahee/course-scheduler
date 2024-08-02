@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-from data import Lesson, Section
+from data import Lesson, Section, Course
 
 
 class Crawler:
@@ -27,15 +27,16 @@ class Crawler:
         chromedriver_autoinstaller.install()
         # Selenium WebDriver 설정
         options = Options()
-        options.headless = True
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
         service = Service()
         self.driver = webdriver.Chrome(service=service, options=options)
 
-    def crawl_and_extract_curriculum(self):
+    def crawl_and_extract_course(self) -> Course:
         print("크롤링을 시작합니다...")
         start_time = datetime.datetime.now()
         attached_contents = 0
-        course_title = "unknown"
 
         try:
             # 페이지 열기
@@ -93,8 +94,6 @@ class Crawler:
                     lessons = section.find_elements(By.XPATH, './/ul/li')
 
                     for number, lesson in enumerate(lessons):
-                        lesson_title = ""
-                        lesson_duration = "00:00:00"
 
                         try:
                             lesson_title_element = lesson.find_element(By.XPATH,
@@ -103,23 +102,17 @@ class Crawler:
                             lesson_duration_element = lesson.find_element(By.XPATH,
                                                                             './/div[contains(@class, "mantine-Group-root")]/p')
                             lesson_duration = lesson_duration_element.text.strip()
-                        except Exception as e:
+                            lesson = Lesson(section_info, number + 1, lesson_title, lesson_duration if lesson_duration else "00:00:00")
+                            self.lessons.append(lesson)
+                        except Exception:
                             # 강의 영상이 아닌 경우
                             attached_contents += 1
-                            # print(f"Error in crawling {number + 1} lesson in section {section_number}: {e}")
-                        finally:
-                            lesson = Lesson(section_info, number + 1, lesson_title, lesson_duration)
-                            self.lessons.append(lesson)
             end_time = datetime.datetime.now()
             print(f"영상이 아닌 자료 {attached_contents}개가 목차에서 제외되었습니다.")
             print(f"소요 시간: {end_time - start_time}")
             print(f"강의 목차 크롤링이 완료되었습니다!")
-            print("======================================================")
             self.driver.quit()
-            return self.lessons
+            return Course(course_title, self.lessons)
         except Exception as e:
             print("강의 정보를 찾을 수 없습니다.")
             exit()
-
-    def get_lessons(self) -> List[Lesson]:
-        return self.lessons

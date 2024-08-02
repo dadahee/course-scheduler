@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 
 class Section:
@@ -38,3 +39,12 @@ class Schedule:
         self.start_lesson = start_lesson
         self.end_lesson = end_lesson
         self.duration = duration
+
+
+class Course:
+    name: str
+    lessons: List[Lesson]
+
+    def __init__(self, name:str, lessons: List[Lesson]):
+        self.name = name
+        self.lessons = lessons
