@@ -19,6 +19,9 @@ class Scheduler:
     def calculate_schedules(self):
         print("수강 일정을 계산합니다...")
 
+        if len(self.lessons) < 1:
+            raise ValueError("강의 정보가 존재하지 않습니다.")
+
         daily_limit = datetime.timedelta(minutes=self.minutes_per_count)
         current_sum = datetime.timedelta()
         start = 0
@@ -36,7 +39,4 @@ class Scheduler:
                 current_sum += lesson.duration
         last_schedule = Schedule(count, self.lessons[start], self.lessons[len(self.lessons) - 1], current_sum)
         self.schedules.append(last_schedule)
-        return self.schedules
-
-    def get_schedules(self):
         return self.schedules
