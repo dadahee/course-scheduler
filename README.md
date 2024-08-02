@@ -33,7 +33,7 @@ __KO__ | [EN](README-en.md)
 
 ```bash
 $ git clone https://github.com/dadahee/course-scheduler.git
-$ cd inflearn-course-scheduler
+$ cd course-scheduler
 $ pip install -r requirements.txt
 ```
 
@@ -52,7 +52,7 @@ $ pip install -r requirements.txt
     "range_settings": {
         "include_start_lesson_title": true, // 수강 일정 시작 범위 강의명 포함 여부
         "include_end_lesson_title": true, // 수강 일정에 마지막 강의명 포함 여부
-        "lesson_index_format": "{section:0>2}.{number:0>2}", // 섹션 내 수업 인덱스들의 표현 형식
+        "lesson_index_format": "{section:0>2}.{number:0>2}", // 섹션 내 수업 인덱스들의 표현 형식 (section: 0부터, number: 1부터 시작)
         "section_index_format": "{section:0>2}.", // 섹션 인덱스 표현 형식
         "range_separator_format": "~" // [시작 범위] (중간에 들어갈 문자열 형식) [종료 범위]
     },
@@ -129,8 +129,7 @@ Optional arguments:
 - `-o OUT`, `--out OUT`: 저장할 파일 (default: `outputs/schedule.md`)
 
 Additional information: 
-- 타 플랫폼 강의에도 활용할 수 있습니다.
-- 강의 목차(`toc.md`) 형식 == `config.json` 형식이면 모두 가능!
+- 강의 목차(default: `outputs/toc.md`) 형식 == `config.json` 형식인 모든 플랫폼 강의에 사용할 수 있습니다.
   ```markdown
   # [Course Title]
     
@@ -303,22 +302,6 @@ Additional information:
     - 03단원 07강 -> 04단원 11강  
     - 05단원 01강 -> 06단원 06강  
     - 06단원 07강 -> 07단원 01강  
-    ```
-
----
-
-## Additional Information
-
-- 수강 범위 계산 명령어(`schedule`)는 타 플랫폼 강의에도 활용할 수 있습니다.
-  - 강의 목차(`toc.md`) 형식 == `config.json` 형식이면 모두 가능!
-    ```markdown
-    # [Course Title]
-    
-    ## [Section Index Format] [Section Title]
-    - [Lesson Index Format] [Lesson Title] [Duration Format]
-    - [Lesson Index Format] [Lesson Title] [Duration Format]
-    - [Lesson Index Format] [Lesson Title] [Duration Format]
-    ... (생략)
     ```
 
 ---
