@@ -14,7 +14,9 @@ class Scheduler:
         self.schedules = []
 
     def calculate_total_time(self, start: int, end: int) -> datetime.timedelta:
-        return sum((lesson.duration for lesson in self.lessons[start : end]), datetime.timedelta())
+        total_time_seconds = sum([lesson.duration for lesson in self.lessons[start: end]], datetime.timedelta())
+        print("총 수강 시간 =", total_time_seconds)
+        return total_time_seconds
 
     def calculate_schedules(self):
         print("수강 일정을 계산합니다...")
@@ -27,7 +29,6 @@ class Scheduler:
         start = 0
         count = 1
 
-        # TODO
         for i, lesson in enumerate(self.lessons):
             if current_sum + lesson.duration > daily_limit:
                 new_schedule = Schedule(count, self.lessons[start], self.lessons[i - 1], current_sum)

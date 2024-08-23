@@ -12,7 +12,7 @@ def read_course(config: Config, filename: str) -> Course:
     loader = Loader(config)
     return loader.load_course(filename)
 
-def fetch_course_with_lessons(url: str):
+def fetch_course_with_lessons(url: str) -> Course:
     crawler = Crawler(url)
     return crawler.crawl_and_extract_course()
 
