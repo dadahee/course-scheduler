@@ -2,7 +2,7 @@ from datetime import datetime
 
 from main import fetch_course_with_lessons
 
-def crawl_course(course_url: str) -> (float, bool):
+def crawl_course_url_and_get_duration(course_url: str) -> (float, bool):
     # 크롤링
     fail_cases = 0
     start_time = datetime.now()
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     while count < 5:
         count += 1
-        required_seconds, successful = crawl_course(COURSE_URL)
+        required_seconds, successful = crawl_course_url_and_get_duration(COURSE_URL)
 
         if successful:
             results.append(required_seconds)

@@ -50,16 +50,16 @@ def load_courses() -> list[str]:
         return course_urls
 
 
-def crawl_courses(course_list: list) -> list:
+def crawl_course_urls_and_get_durations(urls: list) -> list:
     # 크롤링
     crawl_times = []
     crawl_result = []
     count_lessons = 0
     sum_course_minutes = 0
     fail_cases = 0
-    for i in range(len(course_list)):
+    for i in range(len(urls)):
         start_time = datetime.now()
-        course_with_lessons = fetch_course_with_lessons(course_list[i])
+        course_with_lessons = fetch_course_with_lessons(urls[i])
         end_time = datetime.now()
         crawl_seconds = (end_time - start_time).total_seconds()
         if not course_with_lessons.lessons or not course_with_lessons.name:
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     # 강의 URL 목록 파일 이용
     course_urls = load_course_urls(FILE_NAME)
 
-    total_times = crawl_courses(course_urls)
+    total_times = crawl_course_urls_and_get_durations(course_urls)
 
     if len(total_times) > 0:
         total_times.sort()
