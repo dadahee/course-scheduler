@@ -1,6 +1,5 @@
 import datetime
 import re
-from typing import List
 
 import chromedriver_autoinstaller
 from selenium import webdriver
@@ -48,7 +47,7 @@ class Crawler:
 
             print(f"<{course_title}> 강의를 불러옵니다...")
 
-            wait = WebDriverWait(self.driver, 3)
+            wait = WebDriverWait(self.driver, 1)
 
             try:
                 print("목차를 불러옵니다...")
@@ -59,12 +58,12 @@ class Crawler:
                 while attempts < 5:
                     try:
                         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", expand_button)
-                        time.sleep(0.5)  # 잠시 대기
+                        time.sleep(0.15)  # 잠시 대기
                         expand_button.click()
                         break
                     except:
                         attempts += 1
-                        time.sleep(0.5)
+                        time.sleep(0.2)
             except Exception:
                 # "모두 접기" 버튼 찾기
                 collapse_button = self.driver.find_element(By.XPATH, '//button[.//span[text()="모두 접기"]]')
@@ -115,4 +114,5 @@ class Crawler:
             return Course(course_title, self.lessons)
         except Exception as e:
             print("강의 정보를 찾을 수 없습니다.")
-            exit()
+            return Course(None, [])
+            # exit()
